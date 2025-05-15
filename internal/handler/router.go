@@ -19,7 +19,7 @@ func RegisterRoutes(e *echo.Echo, db *gorm.DB) {
 
 	// Vendas
 	e.GET("/vendas", GetVendas(db))
-	e.POST("/vendas", CreateVenda(db))
+	e.POST("/vendas", CreateVenda(db)) 
 
 }
 

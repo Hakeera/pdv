@@ -7,7 +7,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"gorm.io/gorm"
 
-	"pdv/dto"
+	"pdv/internal/dto"
 	"pdv/internal/model"
 )
 
@@ -32,7 +32,7 @@ func (vc *VendaController) CriarVenda(c echo.Context) error {
 
 	// Iniciar transação
 	err := vc.DB.Transaction(func(tx *gorm.DB) error {
-		var total float64
+		var total int64 
 		var itens []model.ItemVenda
 
 		// Validar estoque e calcular total
@@ -46,7 +46,7 @@ func (vc *VendaController) CriarVenda(c echo.Context) error {
 			}
 
 			// Calcular valor do item
-			valorItem := float64(item.Quantidade)*item.PrecoUnitario - item.Desconto
+			valorItem := (int64(item.Quantidade)*item.PrecoUnitario) - item.Desconto
 			total += valorItem
 
 			itens = append(itens, model.ItemVenda{

@@ -6,11 +6,11 @@ import (
 
 type Venda struct {
 	gorm.Model
-	ClienteID *uint    `json:"cliente_id"` 
-	Cliente   *Cliente `json:"cliente,omitempty"`
-	Total     float64  `json:"total"`
+	ClienteID *uint     `json:"cliente_id"` 
+	Cliente   *Cliente  `json:"cliente,omitempty"`
+	Total     int64	    `json:"total"`
 	Itens     []ItemVenda
-	DescontoTotal float64 `json:"descontotal"`
+	DescontoTotal int64 `json:"descontototal"`
   
 }
 

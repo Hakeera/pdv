@@ -8,7 +8,7 @@ import (
 	"gorm.io/gorm"
 )
 
-type ItemVendaInput struct {
+	type ItemVendaInput struct {
 	ProdutoID  uint `json:"produto_id"`
 	Quantidade int  `json:"quantidade"`
 }
@@ -35,7 +35,7 @@ func CreateVenda(db *gorm.DB) echo.HandlerFunc {
 	}
 		
 
-		var total float64
+		var total int64 
 		var itens []model.ItemVenda
 
 		// Transação
@@ -56,13 +56,13 @@ func CreateVenda(db *gorm.DB) echo.HandlerFunc {
 					return err
 				}
 
-				subtotal := float64(item.Quantidade) * prod.Preco
+				subtotal := (int64(item.Quantidade) * prod.Preco)
 				total += subtotal
 
 				itens = append(itens, model.ItemVenda{
 					ProdutoID:  prod.ID,
 					Quantidade: item.Quantidade,
-					PrecoUnit:  prod.Preco,
+					PrecoUnitario:  prod.Preco,
 				})
 			}
 
