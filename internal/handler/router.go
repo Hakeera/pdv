@@ -16,10 +16,13 @@ func RegisterRoutes(e *echo.Echo, db *gorm.DB) {
 	e.GET("/produtos", GetProdutos(db))
 	e.POST("/produtos", CreateProduto(db))
 	e.GET("/produtos/:codigo", GetProdutoByCodigo(db))
+	e.DELETE("/produtos/:id", DeleteProduto(db))
 
 	// Vendas
 	e.GET("/vendas", GetVendas(db))
+	e.GET("/vendas/:id", GetVendaByID(db))
 	e.POST("/vendas", CreateVenda(db)) 
+	e.DELETE("/vendas/:id", DeleteVenda(db))
 
 }
 

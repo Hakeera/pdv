@@ -19,7 +19,7 @@ func main() {
 	// Inicializa rotas
 	handler.RegisterRoutes(e, db)
 
-	log.Println("Servidor rodando em http://localhost:8080")
-	e.Logger.Fatal(e.Start(":8080"))
+	log.Println("Servidor rodando em http://localhost:1323")
+	e.Logger.Fatal(e.Start(":1323"))
 }
 

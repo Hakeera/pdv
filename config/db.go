@@ -27,7 +27,6 @@ func InitDB() (*gorm.DB, error) {
 	// Migrar tabelas
 	err = db.AutoMigrate(
 		&model.Produto{},
-		&model.Cliente{},
 		&model.Venda{},
 		&model.ItemVenda{},
 	)

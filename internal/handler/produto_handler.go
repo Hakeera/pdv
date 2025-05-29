@@ -51,3 +51,33 @@ func GetProdutoByCodigo(db *gorm.DB) echo.HandlerFunc {
 	}
 }
 
+func GetVendaByID(db *gorm.DB) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		id := c.Param("id")
+
+		var venda model.Venda
+		if err := db.Preload("Itens.Produto").First(&venda, id).Error; err != nil {
+			return c.JSON(http.StatusNotFound, echo.Map{"erro": "venda não encontrada"})
+		}
+
+		return c.JSON(http.StatusOK, venda)
+	}
+}
+
+func DeleteProduto(db *gorm.DB) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		id := c.Param("id")
+		var produto model.Produto
+
+		if err := db.First(&produto, id).Error; err != nil {
+			return c.JSON(http.StatusNotFound, echo.Map{"erro": "Produto não encontrado"})
+		}
+
+		if err := db.Delete(&produto).Error; err != nil {
+			return c.JSON(http.StatusInternalServerError, echo.Map{"erro": "Erro ao excluir produto"})
+		}
+
+		return c.JSON(http.StatusOK, echo.Map{"mensagem": "Produto excluído com sucesso"})
+	}
+}
+

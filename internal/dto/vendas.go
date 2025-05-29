@@ -8,7 +8,6 @@ type ItemVendaRequest struct {
 }
 
 type CriarVendaRequest struct {
-	ClienteID     *uint              `json:"cliente_id"`     // nil = venda sem identificação
 	DescontoTotal int64   `json:"desconto_total"` // opcional
 	Itens         []ItemVendaRequest `json:"itens"`
 }
