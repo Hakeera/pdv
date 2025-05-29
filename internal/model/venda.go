@@ -9,6 +9,6 @@ type Venda struct {
 	Total     int64	    `json:"total"`
 	Itens     []ItemVenda
 	DescontoTotal int64 `json:"descontototal"`
-  
+	FormaPagamento string `json:"formapagamento"` 
 }
 
