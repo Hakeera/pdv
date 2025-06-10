@@ -1,8 +1,10 @@
 package handler
 
 import (
+	"fmt"
 	"net/http"
 	"pdv/internal/model"
+	"strings"
 
 	"github.com/labstack/echo/v4"
 	"gorm.io/gorm"
@@ -37,27 +39,86 @@ func GetProdutos(db *gorm.DB) echo.HandlerFunc {
 func CreateProduto(db *gorm.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		var produto model.Produto
+		
+		// Bind dos dados do formulário
 		if err := c.Bind(&produto); err != nil {
-			return c.Render(http.StatusBadRequest, "partials/erro", echo.Map{
-				"Erro": "Dados inválidos",
-			})
+			return c.HTML(http.StatusBadRequest, `
+				<div class="error-message">
+					<h3>❌ Erro ao cadastrar produto</h3>
+					<p>Dados inválidos: `+err.Error()+`</p>
+				</div>
+			`)
 		}
 
+		// Validação dos campos obrigatórios
 		if produto.Nome == "" || produto.CodigoBarras == "" {
-			return c.Render(http.StatusBadRequest, "partials/erro", echo.Map{
-				"Erro": "Campos obrigatórios ausentes",
-			})
+			return c.HTML(http.StatusBadRequest, `
+				<div class="error-message">
+					<h3>❌ Erro ao cadastrar produto</h3>
+					<p>Nome e Código de Barras são obrigatórios</p>
+				</div>
+			`)
 		}
 
+		// Validações adicionais
+		if produto.Preco < 0 {
+			return c.HTML(http.StatusBadRequest, `
+				<div class="error-message">
+					<h3>❌ Erro ao cadastrar produto</h3>
+					<p>Preço não pode ser negativo</p>
+				</div>
+			`)
+		}
+
+		if produto.Estoque < 0 {
+			return c.HTML(http.StatusBadRequest, `
+				<div class="error-message">
+					<h3>❌ Erro ao cadastrar produto</h3>
+					<p>Estoque não pode ser negativo</p>
+				</div>
+			`)
+		}
+
+		// Criar produto no banco de dados
 		if err := db.Create(&produto).Error; err != nil {
-			return c.Render(http.StatusInternalServerError, "partials/erro", echo.Map{
-				"Erro": "Erro ao salvar produto: " + err.Error(),
-			})
+			// Verificar se é erro de duplicação (código de barras único)
+			if strings.Contains(err.Error(), "UNIQUE constraint failed") || 
+			   strings.Contains(err.Error(), "duplicate key") {
+				return c.HTML(http.StatusBadRequest, `
+					<div class="error-message">
+						<h3>❌ Erro ao cadastrar produto</h3>
+						<p>Produto com este código de barras já existe</p>
+					</div>
+				`)
+			}
+			
+			return c.HTML(http.StatusInternalServerError, `
+				<div class="error-message">
+					<h3>❌ Erro ao cadastrar produto</h3>
+					<p>Erro ao salvar produto: `+err.Error()+`</p>
+				</div>
+			`)
 		}
 
-		return c.Render(http.StatusOK, "partials/produto_sucesso", echo.Map{
-			"Produto": produto,
-		})
+		// Formatear preço para exibição (centavos para reais)
+		precoFormatado := fmt.Sprintf("%.2f", float64(produto.Preco)/100.0)
+
+		// Sucesso - retornar HTML de sucesso
+		successHTML := fmt.Sprintf(`
+			<div class="success-message">
+				<h3>✅ Produto cadastrado com sucesso!</h3>
+				<div class="produto-info">
+					<h3>%s</h3>
+					<p><strong>Código:</strong> %s</p>
+					<p><strong>Preço:</strong> <span class="price">R$ %s</span></p>
+					<p><strong>Estoque:</strong> %d unidades</p>
+					<p><strong>ID:</strong> %d</p>
+				</div>
+				<p><small>Modal será fechado automaticamente...</small></p>
+			</div>
+		`, produto.Nome, produto.CodigoBarras, precoFormatado, produto.Estoque, produto.ID)
+
+		return c.HTML(http.StatusOK, successHTML)
 	}
 }
 

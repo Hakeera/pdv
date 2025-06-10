@@ -1,0 +1,13 @@
+<!-- partials/produto_sucesso.html -->
+<div class="success-message">
+    <h3>✅ Produto cadastrado com sucesso!</h3>
+    <div class="produto-info">
+        <h3>{{.Produto.Nome}}</h3>
+        <p><strong>Código:</strong> {{.Produto.CodigoBarras}}</p>
+        <p><strong>Preço:</strong> <span class="price">R$ {{.PrecoFormatado}}</span></p>
+        <p><strong>Estoque:</strong> {{.Produto.Estoque}} unidades</p>
+        <p><strong>ID:</strong> {{.Produto.ID}}</p>
+    </div>
+    <p><small>Modal será fechado automaticamente...</small></p>
+</div>
+
