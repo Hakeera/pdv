@@ -8,32 +8,56 @@ import (
 	"gorm.io/gorm"
 )
 
+func ProdutosPage(c echo.Context) error {
+	return c.Render(http.StatusOK, "produtos.html", map[string]any{
+		"Titulo": "Controle de Produtos",
+	}) 
+}
+
+// Retorna apenas a lista de produtos em HTML (fragment para HTMX)
 func GetProdutos(db *gorm.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		var produtos []model.Produto
 		if err := db.Find(&produtos).Error; err != nil {
-			return c.JSON(http.StatusInternalServerError, echo.Map{"erro": "erro ao buscar produtos"})
+			// Retorna HTML de erro
+			return c.HTML(http.StatusInternalServerError, `
+				<div class="error">
+					<p>Erro ao carregar produtos do banco de dados</p>
+				</div>
+			`)
 		}
-		return c.JSON(http.StatusOK, produtos)
+		
+		// Renderiza apenas o fragment da lista de produtos
+		return c.Render(http.StatusOK, "produtos-list.html", map[string]any{
+			"Produtos": produtos,
+		})
 	}
 }
 
 func CreateProduto(db *gorm.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		var p model.Produto
-		if err := c.Bind(&p); err != nil {
-			return c.JSON(http.StatusBadRequest, echo.Map{"erro": "dados inválidos"})
+		var produto model.Produto
+		if err := c.Bind(&produto); err != nil {
+			return c.Render(http.StatusBadRequest, "partials/erro", echo.Map{
+				"Erro": "Dados inválidos",
+			})
 		}
 
-		if p.CodigoBarras == "" || p.Nome == "" || p.Preco <= 0 {
-			return c.JSON(http.StatusBadRequest, echo.Map{"erro": "campos obrigatórios ausentes"})
+		if produto.Nome == "" || produto.CodigoBarras == "" {
+			return c.Render(http.StatusBadRequest, "partials/erro", echo.Map{
+				"Erro": "Campos obrigatórios ausentes",
+			})
 		}
 
-		if err := db.Create(&p).Error; err != nil {
-			return c.JSON(http.StatusInternalServerError, echo.Map{"erro": "erro ao criar produto"})
+		if err := db.Create(&produto).Error; err != nil {
+			return c.Render(http.StatusInternalServerError, "partials/erro", echo.Map{
+				"Erro": "Erro ao salvar produto: " + err.Error(),
+			})
 		}
 
-		return c.JSON(http.StatusCreated, p)
+		return c.Render(http.StatusOK, "partials/produto_sucesso", echo.Map{
+			"Produto": produto,
+		})
 	}
 }
 
@@ -48,19 +72,6 @@ func GetProdutoByCodigo(db *gorm.DB) echo.HandlerFunc {
 			return c.JSON(http.StatusInternalServerError, echo.Map{"erro": "erro ao buscar produto"})
 		}
 		return c.JSON(http.StatusOK, p)
-	}
-}
-
-func GetVendaByID(db *gorm.DB) echo.HandlerFunc {
-	return func(c echo.Context) error {
-		id := c.Param("id")
-
-		var venda model.Venda
-		if err := db.Preload("Itens.Produto").First(&venda, id).Error; err != nil {
-			return c.JSON(http.StatusNotFound, echo.Map{"erro": "venda não encontrada"})
-		}
-
-		return c.JSON(http.StatusOK, venda)
 	}
 }
 

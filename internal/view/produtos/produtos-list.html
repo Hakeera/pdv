@@ -1,0 +1,48 @@
+{{ if .Produtos }}
+<table>
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Nome</th>
+            <th>Preço</th>
+            <th>Estoque</th>
+            <th>Ações</th>
+        </tr>
+    </thead>
+    <tbody>
+        {{ range .Produtos }}
+        <tr id="produto-{{ .ID }}">
+            <td>{{ .ID }}</td>
+            <td>{{ .Nome }}</td>
+	    <td>R$ {{ .Preco }}</td>
+            <td>{{ .Estoque }}</td>
+            <td>
+                <button 
+                    hx-put="/produtos/{{ .ID }}" 
+                    hx-target="#produto-{{ .ID }}"
+                    hx-swap="outerHTML"
+                    hx-confirm="Tem certeza que deseja excluir este produto?"
+                    style="background: none; border: none; color: red; cursor: pointer;">
+                    Editar
+                </button>
+                <button 
+                    hx-delete="/produtos/{{ .ID }}" 
+                    hx-target="#produto-{{ .ID }}"
+                    hx-swap="outerHTML"
+                    hx-confirm="Tem certeza que deseja excluir este produto?"
+                    style="background: none; border: none; color: red; cursor: pointer;">
+                    Excluir
+                </button>
+            </td>
+        </tr>
+        {{ end }}
+    </tbody>
+</table>
+
+<p><strong>Total de produtos:</strong> {{ len .Produtos }}</p>
+{{ else }}
+<div class="no-products" style="text-align: center; margin: 40px 0; color: #666;">
+    <p>Nenhum produto cadastrado.</p>
+    <a href="/produtos/novo" class="btn">Cadastrar Primeiro Produto</a>
+</div>
+{{ end }}

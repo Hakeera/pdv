@@ -1,0 +1,22 @@
+<!-- internal/view/layouts/base.html -->
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ block "title" . }}PDV{{ end }}</title>
+    <script src="https://unpkg.com/htmx.org@1.9.2"></script>
+</head>
+<body>
+    <header>
+        <h1>PDV</h1>
+        <nav>
+            <a href="/">Início</a> |
+            <a href="/produtos">Produtos</a> |
+            <a href="/vendas">Vendas</a>
+        </nav>
+    </header>
+    <main>
+        {{ block "content" . }}{{ end }}
+    </main>
+</body>
+</html>

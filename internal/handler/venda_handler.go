@@ -21,8 +21,10 @@ type VendaInput struct {
 func CreateVenda(db *gorm.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		var input VendaInput
-		if err := c.Bind(&input); err != nil || len(input.Itens) == 0 || input.FormaPagamento == "" {
-			return c.JSON(http.StatusBadRequest, echo.Map{"erro": "dados inválidos, forma de pagamento ausente ou itens ausentes"})
+		if err := c.Bind(&input); err != nil || len(input.Itens) == 0 {
+			return c.Render(http.StatusBadRequest, "partials/erro", echo.Map{
+				"Erro": "Dados inválidos ou itens ausentes",
+			})
 		}
 
 		var total int64
@@ -32,11 +34,11 @@ func CreateVenda(db *gorm.DB) echo.HandlerFunc {
 			for _, item := range input.Itens {
 				var prod model.Produto
 				if err := tx.First(&prod, item.ProdutoID).Error; err != nil {
-					return echo.NewHTTPError(http.StatusNotFound, "Produto não encontrado")
+					return echo.NewHTTPError(http.StatusBadRequest, "Produto não encontrado")
 				}
 
 				if prod.Estoque < item.Quantidade {
-					return echo.NewHTTPError(http.StatusBadRequest, "Estoque insuficiente para o produto "+prod.Nome)
+					return echo.NewHTTPError(http.StatusBadRequest, "Estoque insuficiente para "+prod.Nome)
 				}
 
 				prod.Estoque -= item.Quantidade
@@ -56,7 +58,6 @@ func CreateVenda(db *gorm.DB) echo.HandlerFunc {
 
 			venda := model.Venda{
 				Total:          total,
-				DescontoTotal:  0, 
 				FormaPagamento: input.FormaPagamento,
 				Itens:          itens,
 			}
@@ -65,10 +66,14 @@ func CreateVenda(db *gorm.DB) echo.HandlerFunc {
 		})
 
 		if err != nil {
-			return c.JSON(http.StatusInternalServerError, echo.Map{"erro": err.Error()})
+			return c.Render(http.StatusInternalServerError, "partials/erro", echo.Map{
+				"Erro": "Erro ao criar venda: " + err.Error(),
+			})
 		}
 
-		return c.JSON(http.StatusCreated, echo.Map{"mensagem": "venda criada com sucesso", "total": total})
+		return c.Render(http.StatusOK, "partials/venda_sucesso", echo.Map{
+			"Total": total,
+		})
 	}
 }
 
@@ -79,6 +84,19 @@ func GetVendas(db *gorm.DB) echo.HandlerFunc {
 			return c.JSON(http.StatusInternalServerError, echo.Map{"erro": "erro ao buscar vendas"})
 		}
 		return c.JSON(http.StatusOK, vendas)
+	}
+}
+
+func GetVendaByID(db *gorm.DB) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		id := c.Param("id")
+
+		var venda model.Venda
+		if err := db.Preload("Itens.Produto").First(&venda, id).Error; err != nil {
+			return c.JSON(http.StatusNotFound, echo.Map{"erro": "venda não encontrada"})
+		}
+
+		return c.JSON(http.StatusOK, venda)
 	}
 }
 

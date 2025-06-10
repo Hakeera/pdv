@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Lista de Produtos - PDV</title>
+    <script src="https://unpkg.com/htmx.org@1.9.2"></script>
+    <style>
+        table { border-collapse: collapse; width: 100%; margin-top: 20px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+        .error { color: red; margin: 20px 0; padding: 10px; background: #fee; border: 1px solid #fcc; }
+        .loading { text-align: center; margin: 20px 0; color: #666; }
+        .actions { margin: 20px 0; }
+        .btn { padding: 8px 16px; margin-right: 10px; text-decoration: none; background: #007bff; color: white; border-radius: 4px; }
+        .btn:hover { background: #0056b3; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>PDV</h1>
+        <nav>
+            <a href="/">Início</a> |
+            <a href="/produtos/page">Produtos</a> |
+            <a href="/vendas">Vendas</a>
+        </nav>
+    </header>
+    <main>
+        <h2>Lista de Produtos</h2>
+        
+        <div class="actions">
+            <a href="/produtos/novo" class="btn">Cadastrar Novo Produto</a>
+            <button 
+                class="btn" 
+                hx-get="/produtos" 
+                hx-target="#produtos-container"
+                hx-indicator="#loading">
+                Recarregar Lista
+            </button>
+        </div>
+        
+        <!-- Container onde a lista será carregada -->
+        <div id="produtos-container" 
+             hx-get="/produtos" 
+             hx-trigger="load"
+             hx-indicator="#loading">
+            <!-- A lista será carregada aqui via HTMX -->
+        </div>
+        
+        <!-- Indicador de loading -->
+        <div id="loading" class="loading htmx-indicator">
+            <p>Carregando produtos...</p>
+        </div>
+    </main>
+</body>
+</html>

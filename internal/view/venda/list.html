@@ -1,0 +1,23 @@
+{{ template "layouts/base.html" . }}
+
+{{ define "title" }}Lista de Produtos{{ end }}
+
+{{ define "list" }}
+<h2>Produtos</h2>
+<table>
+    <tr>
+        <th>Código</th>
+        <th>Nome</th>
+        <th>Preço</th>
+        <th>Estoque</th>
+    </tr>
+    {{ range .Produtos }}
+    <tr>
+        <td>{{ .CodigoBarras }}</td>
+        <td>{{ .Nome }}</td>
+        <td>{{ .Preco }}</td>
+        <td>{{ .Estoque }}</td>
+    </tr>
+    {{ end }}
+</table>
+{{ end }}
